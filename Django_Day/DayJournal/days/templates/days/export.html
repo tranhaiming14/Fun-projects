@@ -1,0 +1,38 @@
+<h2>Export Days</h2>
+<form method="post">
+    {% csrf_token %}
+    <h3>Choose a specific date:</h3>
+    <label for="specific_day">Day:</label>
+    <input type="number" name="specific_day" min="1" max="31>
+    
+    <label for="specific_month">Month:</label>
+    <input type="number" name="specific_month" min="1" max="12>
+    
+    <label for="specific_year">Year:</label>
+    <input type="number" name="specific_year"><br>
+
+    <h3>Or choose a range of dates:</h3>
+    <label for="start_day">Start Day:</label>
+    <input type="number" name="start_day" min="1" max="31">
+    
+    <label for="start_month">Start Month:</label>
+    <input type="number" name="start_month" min="1" max="12">
+    
+    <label for="start_year">Start Year:</label>
+    <input type="number" name="start_year"><br>
+
+    <label for="end_day">End Day:</label>
+    <input type="number" name="end_day" min="1" max="31">
+    
+    <label for="end_month">End Month:</label>
+    <input type="number" name="end_month" min="1" max="12">
+    
+    <label for="end_year">End Year:</label>
+    <input type="number" name="end_year"><br>
+
+    <button type="submit">Export</button>
+    {% if error %}
+    <p style="color: red">{{ error }}</p>
+    {% endif %}
+
+</form>

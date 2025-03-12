@@ -1,0 +1,9 @@
+Sorted by Price:
+1
+2
+3
+
+Sorted by Damage:
+3
+2
+1

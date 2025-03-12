@@ -1,0 +1,67 @@
+<!-- index.html -->
+{% load rating_colors %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Nearest Days</title>
+    <style>
+      .container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .container h1, .container h2 {
+        text-align: center;
+      }
+      .search-form {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+      }
+      .search-form label, .search-form input {
+        margin: 0 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Nearest Days</h1>
+
+      <ul>
+        {% for day in nearest_days %}
+          <li>
+            {{ day.alias }} - {{ day.date_time|date:"F j, Y" }}<br />
+            <strong>Activities:</strong> {{ day.activities }}<br />
+            Workout: <span style="color: {{ day.workout|rating_color }}">{{ day.workout }}</span> |
+            Academic: <span style="color: {{ day.academic|rating_color }}">{{ day.academic }}</span> |
+            SR: <span style="color: {{ day.sr|rating_color }}">{{ day.sr }}</span> |
+            Economics: <span style="color: {{ day.economics|rating_color }}">{{ day.economics }}</span> |            <a href="{% url 'edit_day' day.id %}">Edit</a>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <h2>Create Today's Day</h2>
+      <form method="post">
+        {% csrf_token %} {{ form.as_p }}
+        <button type="submit">Create Day</button>
+      </form>
+
+      <h2>Search for Days</h2>
+      <form action="{% url 'search' %}" method="get" class="search-form">
+        <label for="day">Day:</label>
+        <input type="number" name="day" min="1" max="31">
+        <label for="month">Month:</label>
+        <input type="number" name="month" min="1" max="12">
+        <label for="year">Year:</label>
+        <input type="number" name="year">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Search Results</title>
+  </head>
+  <body>
+    <h1>Search Results</h1>
+    <ul>
+        {% for day in days %}
+            <li>
+                {{ day.alias }} - {{ day.date_time|date:"F j, Y" }}<br />
+                <strong>Activities:</strong> {{ day.activities }}<br />
+                Workout: {{ day.workout }} | Academic: {{ day.academic }} | SR: {{ day.sr }} | Economics: {{ day.economics }}
+            </li>
+        {% empty %}
+            <li>No days found for the selected month and year.</li>
+        {% endfor %}
+    </ul>
+        <a href="{% url 'index' %}">Back to Home</a>
+  </body>
+</html>
