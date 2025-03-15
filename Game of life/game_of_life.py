@@ -86,6 +86,8 @@ def count_alive_cells(board):
     for row in board:
         count += sum(row)  # Sum the values in the row (1s are alive cells)
     return count
+def check_balanced_state(board):
+    pass
 def run_game():
     width = 10
     height = 10
@@ -124,10 +126,17 @@ def run_game():
             while len(parsedrow) != n:
                 print("Error: invalid length, reenter: ")
                 row = input("Enter row " + str(i+1) + " with n binaries: ")
-                parsedrow = row.split()
+                parsedrow = [int(char) for char in row]  
+
             board.append(parsedrow)
-    generations = 0
+    generation = 0
     max_alive_cells = 0
+    first_stable = True
+    stable_generation = -1
+    previous_states = set()  # Set to store previous board states
+    first_prompt = False
+    top_generations = []
+
     while check_board(board):
         # Clear the terminal screen
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -135,16 +144,53 @@ def run_game():
         alive_cells = count_alive_cells(board)
         if alive_cells > max_alive_cells:
             max_alive_cells = alive_cells
-        print(f"current generation: {generations}")
+        top_generations.append((generation, alive_cells))
+        top_generations.sort(key=lambda x: x[1], reverse=True)
+        top_generations = top_generations[:10]  # Keep only the top 10 generations
+
+        print(f"current generation: {generation}")
         print(f"Current alive cells: {alive_cells}")
         print(f"Max alive cells: {max_alive_cells}")
         # Update the board
-        board = next_state(board)
-        generations += 1
-        time.sleep(0.2)
+        current_state = tuple(tuple(row) for row in board)
+
+        # Check if the current state has been seen before
+        if first_stable and current_state in previous_states:
+            stable_generation = generation
+            print(f"Stable state reached after {stable_generation} generations. Reset?")
+            first_stable = False
+            if not first_prompt:
+                reset_choice = input().strip().lower()
+                if reset_choice == "yes":
+                    run_game()  # Restart the game
+                    return  # Exit the current run_game function
+                else:
+                    first_prompt = True  # Exit the loop if the user chooses not to reset
+        else:
+            if first_stable:
+                previous_states.add(current_state)  # Add the current state to the history
+        if stable_generation != -1:
+            print(f"Stable state reached after {stable_generation} generations")
+        new_board = next_state(board)
+        '''board_after_2_iters = next_state(next_state(board))
+        if board_after_2_iters == board:
+            if stable_generation != -1 and generation > stable_generation: 
+                pass
+            else:
+                stable_generation = generation'''
+        board = new_board
+        generation += 1
+        time.sleep(0.4)
     os.system('cls' if os.name == 'nt' else 'clear')
-    print(f"The cells died after {generations} generations.")
+    print(f"The cells died after {generation} generations.")
     print(f"Max alive cells: {max_alive_cells}")
+    print("Top 10 Generations with Most Alive Cells:")
+    for generation, alive_cells in top_generations:
+        print(f"Generation {generation}: {alive_cells} alive cells")
+
+    run_again = input("Run again? ")
+    if run_again:
+        run_game()
 
 if __name__ == "__main__":
     run_game()
