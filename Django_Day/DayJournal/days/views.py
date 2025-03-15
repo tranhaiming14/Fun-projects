@@ -87,11 +87,11 @@ def export(request):
         end_month = request.POST.get('end_month')
         end_year = request.POST.get('end_year')
 
-        zip_buffer = io.BytesIO()
-        zip_filename = ""
+        if specific_day and specific_month and specific_year:
+            zip_buffer = io.BytesIO()
+            zip_filename = ""
 
-        with ZipFile(zip_buffer, 'w') as zip_file:
-            if specific_day and specific_month and specific_year:
+            with ZipFile(zip_buffer, 'w') as zip_file:
                 # Construct specific datetime
                 specific_date_str = f"{specific_year}-{specific_month.zfill(2)}-{specific_day.zfill(2)}"
                 specific_datetime = datetime.datetime.strptime(specific_date_str, '%Y-%m-%d')
@@ -118,18 +118,21 @@ def export(request):
                 zip_file.writestr(filename, content)
 
                 zip_filename = f"Day({specific_date_str}).zip"
-    # Set the buffer to the beginning
-                zip_buffer.seek(0)
 
-                # Prepare the response for file download
-                response = HttpResponse(zip_buffer.read(), content_type='application/zip')
-                response['Content-Disposition'] = f'attachment; filename={zip_filename}'
+            zip_buffer.seek(0)
 
-                # Return the response immediately
-                return response
+            # Prepare the response for file download
+            response = HttpResponse(zip_buffer.read(), content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename={zip_filename}'
 
-            elif (start_day and start_month and start_year and
-                  end_day and end_month and end_year):
+            return response
+
+        elif (start_day and start_month and start_year and
+              end_day and end_month and end_year):
+            zip_buffer = io.BytesIO()
+            zip_filename = ""
+
+            with ZipFile(zip_buffer, 'w') as zip_file:
                 # Construct start and end datetime
                 start_date_str = f"{start_year}-{start_month.zfill(2)}-{start_day.zfill(2)}"
                 end_date_str = f"{end_year}-{end_month.zfill(2)}-{end_day.zfill(2)}"
@@ -151,26 +154,26 @@ def export(request):
                         'error': f"No Days found between {start_date_str} and {end_date_str}."
                     })
 
-            for day in days:
-                local_date_time = day.date_time.astimezone(timezone.get_default_timezone())
-                filename = f"{local_date_time.strftime('%Y-%m-%d')}.txt"
-                content = (f"Alias: {day.alias}\n"
-                        f"Date: {local_date_time}\n"
-                        f"Activities: {day.activities}\n"
-                        f"Workout: {day.workout}\n"
-                        f"Academic: {day.academic}\n"
-                        f"SR: {day.sr}\n"
-                        f"Economics: {day.economics}\n")
-                zip_file.writestr(filename, content)
+                for day in days:
+                    local_date_time = day.date_time.astimezone(timezone.get_default_timezone())
+                    filename = f"{local_date_time.strftime('%Y-%m-%d')}.txt"
+                    content = (f"Alias: {day.alias}\n"
+                            f"Date: {local_date_time}\n"
+                            f"Activities: {day.activities}\n"
+                            f"Workout: {day.workout}\n"
+                            f"Academic: {day.academic}\n"
+                            f"SR: {day.sr}\n"
+                            f"Economics: {day.economics}\n")
+                    zip_file.writestr(filename, content)
 
-            zip_filename = f"Days({start_date_str} - {end_date_str}).zip"
+                zip_filename = f"Days({start_date_str} - {end_date_str}).zip"
 
-        zip_buffer.seek(0)
+            zip_buffer.seek(0)
 
-        # Prepare the response for file download
-        response = HttpResponse(zip_buffer.read(), content_type='application/zip')
-        response['Content-Disposition'] = f'attachment; filename={zip_filename}'
+            # Prepare the response for file download
+            response = HttpResponse(zip_buffer.read(), content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename={zip_filename}'
 
-        return response
+            return response
 
     return render(request, 'days/export.html')
